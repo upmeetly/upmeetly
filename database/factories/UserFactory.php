@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Enums\Role;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -32,6 +35,32 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Add a personal team for the User.
+     */
+    public function withPersonalTeam(array $states = []): static
+    {
+        return $this->afterCreating(function (User $user) use ($states) {
+            Team::factory()
+                ->for($user)
+                ->personal()
+                ->state(array_merge([
+                    'name' => $user->name.' personal team',
+                    'slug' => Str::slug($user->name).'-personal-team-'.time(),
+                ], $states))
+                ->create();
+        });
+    }
+
+    public function withRoles(Team $team, Role|array $roles): static
+    {
+        return $this->afterCreating(function (User $user) use($team, $roles): void {
+            $team->withinPermissionContext(function (Team $team, User $user, array|Role $roles) {
+                $user->assignRole($roles);
+            }, $user, $roles);
+        });
     }
 
     /**

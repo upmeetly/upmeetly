@@ -17,11 +17,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        $this->call(PermissionSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::factory()
+            ->count(10)
+            ->withPersonalTeam()
+            ->create();
+
+        User::factory()
+            ->withPersonalTeam()
+            ->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+
+        $this->call([
+            TeamSeeder::class,
+            MeetupSeeder::class,
         ]);
     }
 }
