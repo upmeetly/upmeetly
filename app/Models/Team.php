@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Context;
 
 class Team extends Model implements BelongsToUser
 {
@@ -31,8 +32,35 @@ class Team extends Model implements BelongsToUser
         setPermissionsTeamId($this->id);
 
         return tap($callback($this, ...$args), function () use ($previousId) {
-            setPermissionsTeamId($previousId);
+            if ($previousId) {
+                setPermissionsTeamId($previousId);
+            } else {
+                setPermissionsTeamId(null);
+            }
         });
+    }
+
+    /**
+     * Get the current team.
+     */
+    public static function current(): Team
+    {
+        if (Context::get('team') instanceof Team) {
+            return Context::get('team');
+        }
+
+        $teamIdFromSession = getPermissionsTeamId() ?? auth()->user()->current_team_id;
+
+        return Team::findOrFail($teamIdFromSession);
+    }
+
+    /**
+     * Set the current team.
+     */
+    public static function setCurrent(Team $team): void
+    {
+        setPermissionsTeamId($team);
+        Context::add('team', $team);
     }
 
     /**
@@ -52,10 +80,9 @@ class Team extends Model implements BelongsToUser
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot([
-                'joined_at',
-                'left_at',
-            ])
+            ->using(Membership::class)
+            ->as('membership')
+            ->withPivot(Membership::pivotFields())
             ->withTimestamps();
     }
 

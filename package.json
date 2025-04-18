@@ -3,9 +3,12 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "compile-theme": "npx tailwindcss@3 --input ./resources/css/filament/dashboard/theme.css --output ./public/css/filament/dashboard/theme.css --config ./resources/css/filament/dashboard/tailwind.config.js --minify"
     },
     "devDependencies": {
+        "@tailwindcss/forms": "^0.5.10",
+        "@tailwindcss/typography": "^0.5.16",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.8.2",
         "concurrently": "^9.0.1",
