@@ -47,7 +47,7 @@ class TeamFactory extends Factory
 
                 $team->users()->attach($team->user, [
                     'status' => MemberStatus::ACTIVE,
-                    'joined_at' => fake()->dateTimeBetween()
+                    'joined_at' => fake()->dateTimeBetween(),
                 ]);
             });
         });
@@ -56,11 +56,11 @@ class TeamFactory extends Factory
     /**
      * Indicate that the team has some users.
      *
-     * @param Role|Role[] $roles
+     * @param  Role|Role[]  $roles
      */
     public function withUsers(Role|array $roles, ?int $count = null): static
     {
-        return $this->afterCreating(function (Team $team) use($count, $roles) {
+        return $this->afterCreating(function (Team $team) use ($count, $roles) {
             $users = User::factory()
                 ->count($count ?? mt_rand(1, 5))
                 ->withPersonalTeam()
@@ -70,7 +70,7 @@ class TeamFactory extends Factory
 
             $team->users()->attach($users->pluck('id'), [
                 'status' => MemberStatus::ACTIVE,
-                'joined_at' => fake()->dateTimeBetween()
+                'joined_at' => fake()->dateTimeBetween(),
             ]);
         });
     }

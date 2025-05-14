@@ -8,29 +8,29 @@ use App\Concerns\Models\HasTeam;
 use App\Concerns\Models\HasUser;
 use App\Contracts\Models\BelongsToTeam;
 use App\Contracts\Models\BelongsToUser;
-use App\Enums\MeetupStatus;
-use Database\Factories\MeetupFactory;
+use App\Enums\TaskStatus;
+use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Meetup extends Model implements BelongsToTeam, BelongsToUser
+class Task extends Model implements BelongsToTeam, BelongsToUser
 {
-    /** @use HasFactory<MeetupFactory> */
+    /** @use HasFactory<TaskFactory> */
     use HasFactory,
         HasTeam,
         HasUser,
         SoftDeletes;
 
     /**
-     * The tasks that belong to the meetup.
+     * The meetup that the task belongs to.
      *
-     * @return HasMany<Task, $this>
+     * @return BelongsTo<Meetup, $this>
      */
-    public function tasks(): HasMany
+    public function meetup(): BelongsTo
     {
-        return $this->hasMany(Task::class);
+        return $this->belongsTo(Meetup::class);
     }
 
     /**
@@ -39,7 +39,7 @@ class Meetup extends Model implements BelongsToTeam, BelongsToUser
     protected function casts(): array
     {
         return [
-            'status' => MeetupStatus::class,
+            'status' => TaskStatus::class,
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\MeetupStatus;
+use App\Models\Meetup;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -16,21 +16,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('meetups', function (Blueprint $table) {
+        Schema::create('tasks', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->string('status');
             $table->foreignIdFor(Team::class)
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-            $table->foreignIdFor(User::class)
+            $table->foreignIdFor(Meetup::class)
                 ->constrained()
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-            $table->string('status')->default(MeetupStatus::DRAFT);
-            $table->string('title');
-            $table->longText('description')->nullable();
-            $table->timestamp('starts_at')->nullable();
-            $table->timestamp('ends_at')->nullable();
+            $table->foreignIdFor(User::class)
+                ->nullable()
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -41,6 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('meetups');
+        Schema::dropIfExists('tasks');
     }
 };
