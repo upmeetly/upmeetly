@@ -56,7 +56,7 @@ class UserFactory extends Factory
 
     public function withRoles(Team $team, Role|array $roles): static
     {
-        return $this->afterCreating(function (User $user) use($team, $roles): void {
+        return $this->afterCreating(function (User $user) use ($team, $roles): void {
             $team->withinPermissionContext(function (Team $team, User $user, array|Role $roles) {
                 $user->assignRole($roles);
             }, $user, $roles);

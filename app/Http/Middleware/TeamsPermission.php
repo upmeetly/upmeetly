@@ -27,7 +27,7 @@ class TeamsPermission
             Team::setCurrent($team);
         }
 
-        abort_if($team && auth()->user() && !auth()->user()->canAccessTenant($team), 403, __('You do not have permission to access this team.'));
+        abort_if($team && auth()->user() && ! auth()->user()->canAccessTenant($team), 403, __('You do not have permission to access this team.'));
 
         if (auth()->user() && $team) {
             auth()->user()->switch($team);

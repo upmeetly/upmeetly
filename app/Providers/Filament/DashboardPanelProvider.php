@@ -38,10 +38,11 @@ class DashboardPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Fuchsia,
             ])
-            ->maxContentWidth(MaxWidth::ScreenTwoExtraLarge)
+            ->maxContentWidth(MaxWidth::Full)
             ->spa()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->sidebarCollapsibleOnDesktop()
+            ->globalSearchFieldKeyBindingSuffix()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
@@ -65,7 +66,7 @@ class DashboardPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->tenantMiddleware([
-                TeamsPermission::class
+                TeamsPermission::class,
             ], isPersistent: true)
             ->authMiddleware([
                 Authenticate::class,

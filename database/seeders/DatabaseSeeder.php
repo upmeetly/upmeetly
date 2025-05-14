@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TeamSeeder::class,
             MeetupSeeder::class,
+            TaskSeeder::class,
         ]);
     }
 }

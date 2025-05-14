@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Context;
 
@@ -21,24 +22,6 @@ class Team extends Model implements BelongsToUser
     use HasFactory,
         HasUser,
         SoftDeletes;
-
-    /**
-     * Execute the given callback within the context of this team.
-     */
-    public function withinPermissionContext(callable $callback, ...$args): mixed
-    {
-        $previousId = getPermissionsTeamId();
-
-        setPermissionsTeamId($this->id);
-
-        return tap($callback($this, ...$args), function () use ($previousId) {
-            if ($previousId) {
-                setPermissionsTeamId($previousId);
-            } else {
-                setPermissionsTeamId(null);
-            }
-        });
-    }
 
     /**
      * Get the current team.
@@ -64,6 +47,24 @@ class Team extends Model implements BelongsToUser
     }
 
     /**
+     * Execute the given callback within the context of this team.
+     */
+    public function withinPermissionContext(callable $callback, ...$args): mixed
+    {
+        $previousId = getPermissionsTeamId();
+
+        setPermissionsTeamId($this->id);
+
+        return tap($callback($this, ...$args), function () use ($previousId) {
+            if ($previousId) {
+                setPermissionsTeamId($previousId);
+            } else {
+                setPermissionsTeamId(null);
+            }
+        });
+    }
+
+    /**
      * Scope a query to only include non-personal teams.
      */
     #[Scope]
@@ -84,6 +85,16 @@ class Team extends Model implements BelongsToUser
             ->as('membership')
             ->withPivot(Membership::pivotFields())
             ->withTimestamps();
+    }
+
+    /**
+     * Meetups that are owned by the team.
+     *
+     * @return HasMany<Meetup, $this>
+     */
+    public function meetups(): HasMany
+    {
+        return $this->hasMany(Meetup::class);
     }
 
     /**
