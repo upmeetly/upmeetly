@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\MemberStatus;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +26,9 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements FilamentUser, HasDefaultTenant, HasTenants, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory,
+        HasRoles,
+        Notifiable;
 
     /**
      * The attributes that should be hidden for serialization.
@@ -108,6 +113,19 @@ class User extends Authenticatable implements FilamentUser, HasDefaultTenant, Ha
             ->as('membership')
             ->withPivot(Membership::pivotFields())
             ->withTimestamps();
+    }
+
+    /**
+     * Scope a query to include users of the current team only.
+     */
+    #[Scope]
+    protected function withinCurrentTeam(Builder $query, MemberStatus $memberStatus = MemberStatus::ACTIVE): void
+    {
+        $team = Team::current();
+
+        $query
+            ->whereHas('ownedTeams', fn (Builder $teams) => $teams->where('id', $team->id))
+            ->orWhereHas('teams', fn (Builder $teams) => $teams->where('id', $team->id)->where('team_user.status', $memberStatus));
     }
 
     /**
